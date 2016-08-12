@@ -38,33 +38,34 @@ module AdminSecurity
       validated_administrator = validated_administrator(new_administrator.id)
       if validated_administrator
         session['admin']['administrator_id'] = validated_administrator.id
+        cookies.signed["user_id"] = validated_administrator.id
         @current_administrator = validated_administrator
       end
 
       return @current_administrator
     end
-   
+
     # --- used in views too
-  
+
     # Accesses the current administrator from the session.  Set it to :false if login fails
     # so that future calls do not hit the database.
     def current_administrator
       @current_administrator ||= (login_from_session || login_from_cookie || :false)
     end
-    
+
     # Returns true or false if the administrator is logged in.
     # Preloads @current_administrator with the administrator model if they're logged in.
     def logged_in?
       current_administrator != :false
     end
- 
+
     # Redirect as appropriate when an access request fails.
     def access_denied
       store_location
       default_message = "You must be logged in to access this area."
       flash[:alert] = self.class.options.fetch(:access_denied_message, default_message)
       login_path = self.class.options[:login_path] || root_path
-      redirect_to login_path 
+      redirect_to login_path
       false
     end
 
@@ -74,7 +75,7 @@ module AdminSecurity
       session['admin']||={}
       session['admin']['return_to'] = request.fullpath
     end
-   
+
     # Called from #current_administrator.
     # First attempt to login by the administrator id stored in the session.
     def login_from_session
@@ -110,7 +111,7 @@ module AdminSecurity
         return administrator_block.call(administrator_id)
       end
     end
-   
+
   end
 
 end
